@@ -1,0 +1,40 @@
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+
+defaults: &defaults
+  working_directory: ~/flights-collector
+  docker:
+    - image: circleci/mongo:3.4
+    
+version: 2
+jobs:
+  build:
+  
+    <<: *defaults
+    
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+      
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+            git submodule update --remote --merge
+
+      - run:
+          name: Prepare MongoDB
+          command: |
+            mongod
+            show dbs
+
+workflows:
+  version: 2
+  build_accept_deploy:
+    jobs:
+      - build
